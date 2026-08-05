@@ -27,12 +27,6 @@ export const getDisplayMedia = createServerFn({ method: "GET" }).handler(async (
   return db()`SELECT id, title, source, video_url, is_active, is_current, queue_order FROM display_media WHERE is_active = true ORDER BY queue_order ASC, created_at ASC`;
 });
 
-export const saveInstagramProfile = createServerFn({ method: "POST" })
-  .inputValidator((input) => z.object({ profileUrl: z.string().url().refine((url) => /instagram\.com/i.test(url)) }).parse(input))
-  .handler(async ({ data }) => { await ensureSchema(); await db()`INSERT INTO display_settings (key, value) VALUES ('instagram_profile', ${data.profileUrl}) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`; return { profileUrl: data.profileUrl }; });
-
-export const getInstagramProfile = createServerFn({ method: "GET" }).handler(async () => { await ensureSchema(); const rows = await db()`SELECT value FROM display_settings WHERE key = 'instagram_profile'`; return rows[0]?.value ?? "https://www.instagram.com/alisanpg/"; });
-
 export const publishDisplayMedia = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ title: z.string().min(1).max(160), videoUrl: mediaUrl, source: z.enum(["upload", "instagram"]).default("upload") }).parse(input))
   .handler(async ({ data }) => { await ensureSchema(); const sql = db(); const count = await sql`SELECT count(*)::int AS count FROM display_media`; const rows = await sql`INSERT INTO display_media (title, video_url, source, is_current, queue_order) VALUES (${data.title}, ${data.videoUrl}, ${data.source}, ${(count[0]?.count ?? 0) === 0}, ${count[0]?.count ?? 0}) RETURNING id`; return rows[0]; });
