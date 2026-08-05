@@ -86,6 +86,18 @@ export type Database = {
         }
         Relationships: []
       }
+      display_media: {
+        Row: { created_at: string; created_by: string | null; id: string; instagram_permalink: string | null; is_active: boolean; is_current: boolean; queue_order: number; source: string; thumbnail_url: string | null; title: string; video_url: string }
+        Insert: { created_at?: string; created_by?: string | null; id?: string; instagram_permalink?: string | null; is_active?: boolean; is_current?: boolean; queue_order?: number; source?: string; thumbnail_url?: string | null; title: string; video_url: string }
+        Update: { created_at?: string; created_by?: string | null; id?: string; instagram_permalink?: string | null; is_active?: boolean; is_current?: boolean; queue_order?: number; source?: string; thumbnail_url?: string | null; title?: string; video_url?: string }
+        Relationships: []
+      }
+      instagram_connections: {
+        Row: { access_token: string | null; connected_at: string; id: string; profile_url: string; updated_at: string; username: string | null }
+        Insert: { access_token?: string | null; connected_at?: string; id?: string; profile_url: string; updated_at?: string; username?: string | null }
+        Update: { access_token?: string | null; connected_at?: string; id?: string; profile_url?: string; updated_at?: string; username?: string | null }
+        Relationships: []
+      }
       invoices: {
         Row: {
           created_at: string

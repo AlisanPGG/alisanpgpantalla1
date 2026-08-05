@@ -1,17 +1,18 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Sparkles, ClipboardList, Receipt, ArrowLeft, LogOut, Settings } from "lucide-react";
+import { Sparkles, ClipboardList, Receipt, ArrowLeft, LogOut, Settings, MonitorPlay } from "lucide-react";
 import AIChat from "@/components/empleado/AIChat";
 import WorkForm from "@/components/empleado/WorkForm";
 import Invoice from "@/components/empleado/Invoice";
 import Services from "@/components/empleado/Services";
+import MediaManager from "@/components/empleado/MediaManager";
 
 export const Route = createFileRoute("/panel")({
   component: Dashboard,
   head: () => ({ meta: [{ title: "Panel empleado | TECNI-RTM" }] }),
 });
 
-type Tab = "chat" | "form" | "invoice" | "services";
+type Tab = "chat" | "form" | "invoice" | "services" | "media";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ function Dashboard() {
     { id: "chat", label: "Chat con IA", icon: Sparkles },
     { id: "form", label: "Formulario de trabajo", icon: ClipboardList },
     { id: "services", label: "Servicios y tiempos", icon: Settings },
+    { id: "media", label: "Pantalla y videos", icon: MonitorPlay },
     { id: "invoice", label: "Factura", icon: Receipt },
   ];
 
@@ -90,6 +92,7 @@ function Dashboard() {
         {tab === "chat" && <AIChat onDone={() => setTab("form")} />}
         {tab === "form" && <WorkForm onDone={() => setTab("invoice")} />}
         {tab === "services" && <Services onGoInvoice={() => setTab("invoice")} />}
+        {tab === "media" && <MediaManager />}
         {tab === "invoice" && <Invoice />}
       </main>
     </div>

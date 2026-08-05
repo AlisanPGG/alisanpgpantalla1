@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Wrench, Clock, ArrowUpRight, AlertCircle, Megaphone } from "lucide-react";
+import { Wrench, Clock, ArrowUpRight, AlertCircle, Megaphone, Film } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { playCallChime } from "@/lib/callSound";
@@ -28,6 +28,7 @@ type Job = {
   bay: string | null;
   called_at: string | null;
 };
+type DisplayMedia = { id: string; title: string; video_url: string; is_active: boolean; is_current: boolean; queue_order: number };
 
 function CustomerDisplay() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -36,6 +37,8 @@ function CustomerDisplay() {
   const firstLoad = useRef(true);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const audioUnlockedRef = useRef(false);
+  const [videos, setVideos] = useState<DisplayMedia[]>([]);
+  const [videoIndex, setVideoIndex] = useState(0);
 
   // Load + realtime
   useEffect(() => {
@@ -63,6 +66,19 @@ function CustomerDisplay() {
       supabase.removeChannel(ch);
       clearInterval(t);
     };
+  }, []);
+
+  useEffect(() => {
+    const loadVideos = async () => {
+      const { data } = await supabase.from("display_media").select("id,title,video_url,is_active,is_current,queue_order").eq("is_active", true).order("queue_order", { ascending: true }).order("created_at", { ascending: true });
+      const playlist = (data ?? []) as DisplayMedia[];
+      setVideos(playlist);
+      const selectedIndex = playlist.findIndex((video) => video.is_current);
+      setVideoIndex(selectedIndex >= 0 ? selectedIndex : 0);
+    };
+    loadVideos();
+    const channel = supabase.channel("display_media_screen").on("postgres_changes", { event: "*", schema: "public", table: "display_media" }, loadVideos).subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   // Sonido cuando aparece una NUEVA llamada (después de la primera carga)
@@ -204,15 +220,11 @@ function CustomerDisplay() {
               </h2>
             </div>
             <div className="flex-1 bg-black flex flex-col items-center justify-center relative">
-              {/* Contenedor de Video (YouTube playlist de la empresa) */}
-              <iframe 
-                className="w-full h-full absolute inset-0"
-                src="https://www.youtube.com/embed/YWENyZ-5uxI?playlist=YomM0mZItT0,X9E1f-Grct4&autoplay=1&mute=1&loop=1" 
-                title="Videos de Alisan PG"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
+              {videos.length ? (
+                <video key={videos[videoIndex]?.id} src={videos[videoIndex]?.video_url} autoPlay muted playsInline controls className="absolute inset-0 h-full w-full object-cover" onEnded={() => setVideoIndex((current) => (current + 1) % videos.length)} />
+              ) : (
+                <div className="p-8 text-center text-sm text-white/70"><Film className="mx-auto mb-3 h-9 w-9" />El próximo video publicado por el equipo aparecerá aquí.</div>
+              )}
             </div>
           </section>
 
