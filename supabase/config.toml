@@ -1,1 +1,4 @@
 project_id = "fznhdcfexzybvvdzwjkm"
+
+[functions.instagram-connect]
+verify_jwt = false

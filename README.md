@@ -19,6 +19,13 @@ Para que esta función quede operativa en cada entorno, aplica las migraciones d
 
 > La importación automática de Reels requiere una aplicación de Meta con OAuth configurado en el backend. Guardar solo una URL de Instagram no concede permisos para leer los videos privados de una cuenta.
 
+### Conectar Instagram
+
+1. Convierte `@alisanpg` en cuenta profesional y vincúlala a una página de Facebook.
+2. En Meta for Developers crea una app, agrega **Facebook Login** e incluye esta URL de redirección: `https://fznhdcfexzybvvdzwjkm.supabase.co/functions/v1/instagram-connect`.
+3. Configura en los secretos de Supabase: `META_APP_ID`, `META_APP_SECRET`, `META_REDIRECT_URI` (la URL anterior) y `APP_URL` (la URL pública de Vercel).
+4. Despliega la función `instagram-connect` y aplica las migraciones. Desde el panel, pulsa **Conectar con Instagram**, aprueba el acceso y luego **Sincronizar Reels**.
+
 ## Desarrollo local
 
 1. Instala dependencias: `pnpm install`.
