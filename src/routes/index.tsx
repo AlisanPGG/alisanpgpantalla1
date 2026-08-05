@@ -4,6 +4,7 @@ import { Wrench, Clock, ArrowUpRight, AlertCircle, Megaphone, Film } from "lucid
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { playCallChime } from "@/lib/callSound";
+import { getDisplayMedia } from "@/lib/media.functions";
 
 export const Route = createFileRoute("/")({
   component: CustomerDisplay,
@@ -70,15 +71,14 @@ function CustomerDisplay() {
 
   useEffect(() => {
     const loadVideos = async () => {
-      const { data } = await supabase.from("display_media").select("id,title,video_url,is_active,is_current,queue_order").eq("is_active", true).order("queue_order", { ascending: true }).order("created_at", { ascending: true });
-      const playlist = (data ?? []) as DisplayMedia[];
+      const playlist = (await getDisplayMedia()) as DisplayMedia[];
       setVideos(playlist);
       const selectedIndex = playlist.findIndex((video) => video.is_current);
       setVideoIndex(selectedIndex >= 0 ? selectedIndex : 0);
     };
     loadVideos();
-    const channel = supabase.channel("display_media_screen").on("postgres_changes", { event: "*", schema: "public", table: "display_media" }, loadVideos).subscribe();
-    return () => { supabase.removeChannel(channel); };
+    const interval = setInterval(loadVideos, 8000);
+    return () => { clearInterval(interval); };
   }, []);
 
   // Sonido cuando aparece una NUEVA llamada (después de la primera carga)
